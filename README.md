@@ -199,7 +199,7 @@ If you are familiar with running IRIS in the Docker containers, you migh have us
 docker run --rm -p 52773:52773 --init --name iris store/intersystems/iris-community:2020.4.0.524.0
 ```
 
-The goal of this flag is to prevent formation of the "zombie processes". Unfortunatly there is no such dlag in Kubernetes. As an alternative in your own containers you can use `tini` in your Dockerfile as follows:
+The goal of this flag is to prevent formation of the "zombie processes". Unfortunatly there is no such flag in Kubernetes. As an alternative, in your own containers you can use `tini` in your Dockerfile as follows:
 ```
 FROM iris-community:2020.4.0.524.0
 ...
