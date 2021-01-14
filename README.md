@@ -1,6 +1,6 @@
 # Highly available IRIS deployment on Kubernetes without mirroring
 
-This repo allows you to create highly - avaliable IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relyes on the distributed highlt avaliable storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
+This repo allows you to create highly - avaliable IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relyes on the distributed highly avaliable storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
 
 ## Getting Started
 
@@ -10,7 +10,7 @@ kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/master/depl
 
 kubectl apply -f https://github.com/antonum/ha-iris-k8s/raw/main/tldr.yaml
 ```
-First `kubectl apply` installs Longhorn - open source distributed Kubernetes storage engine that would allow our system to tolerate failure of individual disks, nodes and even entire Availability zone, without involving mirroring. Second would install IRIS deployment, using Longhorn storage for Durable SYS as well as associated volume claim and service, exposing IRIS to the outside world. Deployment would take care of things like failure of the individual IRIS instance. 
+First `kubectl apply` installs Longhorn - open source distributed Kubernetes storage engine that would allow our system to tolerate failure of individual disks, nodes and even entire Availability zone, without involving mirroring. Second would install InterSystems IRIS deployment, using Longhorn storage for Durable SYS as well as associated volume claim and service, exposing IRIS to the outside world. Deployment would take care of things like failure of the individual IRIS instance. 
 
 Wait for all the pods turn to Running state
 ```
@@ -29,7 +29,7 @@ NAME         TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)           AGE
 iris-svc     LoadBalancer   10.0.219.94   40.88.18.182   52773:30056/TCP   6m3s
 kubernetes   ClusterIP      10.0.0.1      <none>         443/TCP           6d9h
 ```
-Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Portal.Home.zen 
+Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Portal.Home.zen - default password is 'SYS'. See below "Zombies and other stuff" on overriding it.
 
 Now start messing around. But before we do it - try to add some data into the database and make sure it's there when IRIS is back online.
 
@@ -191,4 +191,25 @@ For Longhorn you need three worker nodes in the cluster and open-iscsi installed
 
 Default installation of Azure AKS known to work with Longhorn out of the box. AWS EKS might need additional step of installing open-iscsi on the nodes https://longhorn.io/docs/1.1.0/deploy/install/#installing-open-iscsi. GKE requires additional step, documented here: https://longhorn.io/docs/1.1.0/advanced-resources/os-distro-specific/csi-on-gke/
 
+## Beware of Zombies and other stuff
 
+If you are familiar with running IRIS in the Docker containers, you migh have used the `--init` flag.
+
+```
+docker run --rm -p 52773:52773 --init --name iris store/intersystems/iris-community:2020.4.0.524.0
+```
+
+The goal of this flag is to prevent formation of the "zombie processes". Unfortunatly there is no such dlag in Kubernetes. As an alternative in your own containers you can use `tini` in your Dockerfile as follows:
+```
+FROM iris-community:2020.4.0.524.0
+...
+# Add Tini
+USER root
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+USER irisowner
+ENTRYPOINT ["/tini", "--", "/iris-main"]
+```
+
+To override default password - you can now use PasswordHash field in CPF Merge. Read more at: https://docs.intersystems.com/irisforhealthlatest/csp/docbook/Doc.View.cls?KEY=ADOCK#ADOCK_iris_images_password_auth
