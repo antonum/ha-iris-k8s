@@ -10,15 +10,15 @@ kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/master/depl
 
 kubectl apply -f https://github.com/antonum/ha-iris-k8s/raw/main/tldr.yaml
 ```
-First `kubectl apply` installs Longhorn - open source distributed Kubernetes storage engine that would allow our system to tolerate failure of individual disks, nodes and even entire Availability zone, without involving mirroring. Second would install InterSystems IRIS deployment, using Longhorn storage for Durable SYS as well as associated volume claim and service, exposing IRIS to the outside world. Deployment would take care of things like failure of the individual IRIS instance. 
+First `kubectl apply` installs Longhorn - open source distributed Kubernetes storage engine that would allow our system to tolerate failure of individual disks, nodes and even entire Availability Zone, without involving mirroring. Second one would install InterSystems IRIS deployment, using Longhorn storage for Durable SYS as well as associated volume claim and service, exposing IRIS to the outside world. Deployment would take care of things like failure of the individual IRIS container. 
 
-Wait for all the pods turn to Running state
+Wait for all the pods turn to the Running state
 ```
 kubectl get pods -A 
 ```
 If some pods in the `longhorn-system` namespace are not coming up after few minutes - check the Longhorn troubleshooting section below.
 
-Identify pod name for IRIS deployment public IP of the 'iris--csv' service and node,  running IRIS pod.
+Identify pod name for IRIS deployment public IP of the 'iris-svc' service and node, running the IRIS pod.
 ```
 kubectl get pods -o wide
 NAME                    READY   STATUS    RESTARTS   AGE     IP            NODE                                NOMINATED NODE   READINESS GATES
@@ -41,7 +41,7 @@ USER>zw ^k8stest
 ^k8stest=1
 ^k8stest(1)="01/14/2021 14:13:19 running on iris-6d8896d584-8lzn5"
 ```
-Now let's do what is now called the fancy name of "chaos engineering":
+Now let's do what is sometimes described with the fancy term - "chaos engineering":
 
 ```
 # Delete the pod
@@ -93,9 +93,9 @@ USER>
 
 ### iris-pvc.yaml
 
-Persistent volume claim. This is what IRIS would use to store all the data that needs to survive upon outage. Nature of this storage defines the kinds of the outage deployment is able to handle. Non - distributed container storage (default for most of the cloud-provided managed kubernetes implemetation) require that failed pod must be restarted on the same node where it was initially launched, reducing number of outage scenarios deployment can successfully recover from.
+Persistent volume claim. This is what IRIS would use to store all the data that needs to survive the outage. Nature of this storage defines the kinds of the outage deployment is able to handle. Non - distributed container storage (default for most of the cloud-provided managed kubernetes implemetation) require that failed pod must be restarted on the same node where it was initially launched, reducing number of outage scenarios deployment can successfully recover from.
 
-In this repo we use "longhorn" volume type. Longhorn for this project acts as an example of distributed block storage for Kubernetes. It's free, open source and very easy to install. Feel free to try any other distributed k8s storage you'll see fit. StorageOS, Portworx, OpenEBS are examples of open source and/or freemium solutions. Enterprise storage options like NetApp and PureStorage are on the higher end of the spectrum here too.
+In this repo we use "longhorn" volume type. Longhorn here acts as an example of distributed block storage for Kubernetes. It's free, open source and very easy to install. Feel free to try any other distributed k8s storage you'll see fit. StorageOS, Portworx, OpenEBS are examples of open source and/or freemium solutions. Enterprise storage options like NetApp and PureStorage are on the higher end of the spectrum here too.
 
 ### iris-deployment.yaml
 
