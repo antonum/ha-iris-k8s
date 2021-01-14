@@ -1,0 +1,39 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: iris
+spec:
+  selector:
+    matchLabels:
+      app: iris
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iris
+    spec:
+      containers:
+      - image: store/intersystems/iris-community:2020.4.0.524.0
+        name: iris
+        env:
+        - name: ISC_DATA_DIRECTORY
+          value: /external/iris
+        - name: ISC_CPF_MERGE_FILE
+          value: /external/merge/merge.cpf
+        ports:
+        - containerPort: 52773
+          name: smp-http
+        volumeMounts:
+        - name: iris-external-sys
+          mountPath: /external
+        - name: cpf-merge
+          mountPath: /external/merge
+      volumes:
+      - name: iris-external-sys
+        persistentVolumeClaim:
+          claimName: iris-pvc
+      - name: cpf-merge
+        configMap:
+          name: iris-cpf-merge

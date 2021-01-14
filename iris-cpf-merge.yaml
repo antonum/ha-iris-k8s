@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iris-cpf-merge
+  namespace: default
+data:
+  merge.cpf: |-
+    [config]
+    globals=0,0,800,0,0,0
+    gmheap=256000
