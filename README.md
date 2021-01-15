@@ -31,6 +31,8 @@ kubernetes   ClusterIP      10.0.0.1      <none>         443/TCP           6d9h
 ```
 Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Portal.Home.zen - default password is 'SYS'. See below "Zombies and other stuff" on overriding it.
 
+## Simulate the Failure
+
 Now start messing around. But before we do it - try to add some data into the database and make sure it's there when IRIS is back online.
 
 ```
@@ -90,7 +92,7 @@ iris session iris
 USER>
 ```
 
-## Examining the components
+## Examining the Components
 
 `tldr.yaml` is just a collection of kubernetes resources that can be used to deploy "all in one" solution. Individual resources are described in this section.
 
@@ -106,7 +108,9 @@ IRIS Deployment. It manages one and exactly one replica of the pod, running IRIS
 
 *Durable SYS* - `ISC_DATA_DIRECTORY` variable defines the mount point where IRIS would store all the data that needs to survive pod restart. Corresponding `iris-external-sys` volume mount refers to the Persistent Volume Claim, defined in the `iris-pvc.yaml` file. Read more on the Durable SYSY feature of IRIS here:  https://docs.intersystems.com/irisforhealthlatest/csp/docbook/DocBook.UI.Page.cls?KEY=ADOCK#ADOCK_iris_durable
 
-*CPF Merge* - Optional component, allowing you to define configuration that would be added to the iris.cpf file upon the system start. In the provided example we set global buffers and gmheap value via the ConfigMap, defined in the `iris-cpf-merge.yaml` file.
+*CPF Merge* - Optional component, allowing you to define configuration that would be added to the iris.cpf file upon the system start. `ISC_CPF_MERGE_FILE` variable defines the location of the file, to be used in merge. In the provided example we set global buffers and gmheap value via the ConfigMap, defined in the `iris-cpf-merge.yaml` file.
+
+*Liveness Probe* - optional. Checks if IRIS instance is running inside the container. Kubernetes will restart the container if probe is failing. You might need to adjust `initialDelaySeconds` field to allow IRIS more time to reach the "running" state.
 
 ### iris-cpf-merge.yaml
 
@@ -126,7 +130,7 @@ kubernetes   ClusterIP      10.0.0.1      <none>         443/TCP           6d9h
 ```
 Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Portal.Home.zen 
 
-## Storage scaling and Backup
+## Storage Scaling and Backup
 
 To increase the size of the IRIS volume - adjust storage request in persistent volume claim (file `iris-pvc.yaml`), used by IRIS.
 ```
@@ -168,7 +172,7 @@ For IRIS it is recommended that you execute External Freeze before taking the ba
 
 
 
-## Longhorn troubleshooting and alternatives
+## Longhorn Troubleshooting and Alternatives
 
 IRIS deployment is using Longhorn via Persistent Volume Claim `iris-pvc.yaml`. If you want to change it to some other Storage Class - just change this line in 'iris-pvc.yaml' or 'tldr.yaml' to another Storage Class you have.
 
@@ -194,7 +198,7 @@ For Longhorn you need three worker nodes in the cluster and open-iscsi installed
 
 Default installation of Azure AKS known to work with Longhorn out of the box. AWS EKS might need additional step of installing open-iscsi on the nodes https://longhorn.io/docs/1.1.0/deploy/install/#installing-open-iscsi. GKE requires additional step, documented here: https://longhorn.io/docs/1.1.0/advanced-resources/os-distro-specific/csi-on-gke/
 
-## Beware of Zombies and other stuff
+## Beware of Zombies and Other Stuff
 
 If you are familiar with running IRIS in the Docker containers, you might have used the `--init` flag.
 
@@ -215,4 +219,4 @@ USER irisowner
 ENTRYPOINT ["/tini", "--", "/iris-main"]
 ```
 
-To override default password - you can now use PasswordHash field in CPF Merge. Read more at: https://docs.intersystems.com/irisforhealthlatest/csp/docbook/Doc.View.cls?KEY=ADOCK#ADOCK_iris_images_password_auth
+To override default password - you can now use `PasswordHash` field in the CPF Merge file. Read more at: https://docs.intersystems.com/irisforhealthlatest/csp/docbook/Doc.View.cls?KEY=ADOCK#ADOCK_iris_images_password_auth
