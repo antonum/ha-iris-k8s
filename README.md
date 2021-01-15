@@ -1,10 +1,10 @@
 # Highly available IRIS deployment on Kubernetes without mirroring
 
-This repo allows you to create highly - avaliable IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relyes on the distributed highly avaliable storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
+This repo allows you to create highly - available IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relies on the distributed highly available storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
 
 ## Getting Started
 
-Install Longhorn (distributed highly-avaliable storage CSI for K8s) and IRIS deployment
+Install Longhorn (distributed highly-available storage CSI for K8s) and IRIS deployment
 ```
 kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/master/deploy/longhorn.yaml
 
@@ -44,15 +44,18 @@ USER>zw ^k8stest
 Now let's do what is sometimes described with the fancy term - "chaos engineering":
 
 ```
-# Delete the pod
+# Stop IRIS - Container will be restarted automatically
+kubectl exec -it iris-6d8896d584-8lzn5 -- iris stop iris quietly
+
+# Delete the pod - Pod will be recreated
 kubectl delete pod iris-6d8896d584-8lzn5
 
-# "force drain" the node, serving the iris pod
+# "force drain" the node, serving the iris pod - Pod would be recreated on another node
 kubectl drain aks-agentpool-29845772-vmss000001 --delete-local-data --ignore-daemonsets
 
-# Delete the node
+# Delete the node - Pod would be recreated on another node
 # well... you can't really do it with kubectl. Find that instance or VM and KILL it.
-# if you have access to the machine - turn off the power or disconnect the network cable. Seriosly!
+# if you have access to the machine - turn off the power or disconnect the network cable. Seriously!
 ```
 In all cases IRIS would be back online with all the data fairly soon.
 
@@ -138,13 +141,13 @@ and re-apply the pvc specificatin.
 kubectl apply -f iris-pvc.yaml
 ```
 
-How soon and under what condition the volume space would be extended, depents on the storage driver implementation. For longhorn it takes few minutes, but requires PVC to be disconnected from the pod. So basically you'll need to stop the deployment, before the change would take effect.
+How soon and under what condition the volume space would be extended, depends on the storage driver implementation. For longhorn it takes few minutes, but requires PVC to be disconnected from the pod. So basically you'll need to stop the deployment, before the change would take effect.
 
 Besides high availability, most of the kubernetes container storage solutions provide convinient options for the backup, snapshots and restore. Details are implementation - specific, but the common convention is that backup is associated with VolumeSnapshot. It is so for Longhorn.
 
 `iris-volume-snapshot.yaml` is the example of such volume snapshot. Before using it you need to configure backups to either S3 bucket or NFS volume in Longhorn. https://longhorn.io/docs/1.0.1/snapshots-and-backups/backup-and-restore/set-backup-target/ 
 
-Longhorn provides web - based UI for configuring man managing volumes.
+Longhorn provides web - based UI for configuring and managing volumes.
 
 Identify the pod, running longhorn-ui component and establish port forwarding with kubectl:
 
@@ -193,7 +196,7 @@ Default installation of Azure AKS known to work with Longhorn out of the box. AW
 
 ## Beware of Zombies and other stuff
 
-If you are familiar with running IRIS in the Docker containers, you migh have used the `--init` flag.
+If you are familiar with running IRIS in the Docker containers, you might have used the `--init` flag.
 
 ```
 docker run --rm -p 52773:52773 --init --name iris store/intersystems/iris-community:2020.4.0.524.0

@@ -30,6 +30,14 @@ spec:
           mountPath: /external
         - name: cpf-merge
           mountPath: /external/merge
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "iris qlist iris | grep running"
       volumes:
       - name: iris-external-sys
         persistentVolumeClaim:
