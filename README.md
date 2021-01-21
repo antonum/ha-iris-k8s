@@ -2,6 +2,8 @@
 
 This repo allows you to create highly - available IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relies on the distributed highly available storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
 
+![Mirroring vs. K8s distributes storage](images/storage-diagram.png)
+
 ## Getting Started
 
 Install Longhorn (distributed highly-available storage CSI for K8s) and IRIS deployment
@@ -34,6 +36,8 @@ Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Porta
 ## Simulate the Failure
 
 Now start messing around. But before we do it - try to add some data into the database and make sure it's there when IRIS is back online.
+
+![Outage](images/storage-outage.png)
 
 ```
 kubectl exec -it iris-6d8896d584-8lzn5 -- iris session iris
