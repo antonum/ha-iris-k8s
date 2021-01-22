@@ -1,8 +1,10 @@
 # Highly available IRIS deployment on Kubernetes without mirroring
 
+[Check out extented article at InterSystems Development Community](https://community.intersystems.com/post/highly-available-iris-deployment-kubernetes-without-mirroring)
+
 This repo allows you to create highly - available IRIS deployment that is capable of sustaining pod, node and availability zone failure. Instead of traditional IRIS mirroring it relies on the distributed highly available storage (Longhorn project is used as an example) and Kubernetes deployment replicas to keep the IRIS up and running at all times.
 
-![Mirroring vs. K8s distributes storage](images/storage-diagram.png)
+![Mirroring vs. K8s distributes storage](https://github.com/antonum/ha-iris-k8s/raw/main/images/storage-diagram.png)
 
 ## Getting Started
 
@@ -37,7 +39,7 @@ Access IRIS Management portal at: http://40.88.18.182:52773/csp/sys/%25CSP.Porta
 
 Now start messing around. But before we do it - try to add some data into the database and make sure it's there when IRIS is back online.
 
-![Outage](images/storage-outage.png)
+![Outage](https://github.com/antonum/ha-iris-k8s/raw/main/images/storage-outage.png)
 
 ```
 kubectl exec -it iris-6d8896d584-8lzn5 -- iris session iris
