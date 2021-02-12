@@ -1,0 +1,85 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: iris
+spec:
+  selector:
+    matchLabels:
+      app: iris
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iris
+    spec:
+      containers:
+      - image: store/intersystems/irishealth-community-arm64:2020.4.0.524.0
+        name: iris
+        env:
+        - name: ISC_DATA_DIRECTORY
+          value: /external/iris
+        - name: ISC_CPF_MERGE_FILE
+          value: /external/merge/merge.cpf
+        ports:
+        - containerPort: 52773
+          name: smp-http
+        volumeMounts:
+        - name: iris-external-sys
+          mountPath: /external
+        - name: cpf-merge
+          mountPath: /external/merge
+        livenessProbe:
+          initialDelaySeconds: 25
+          periodSeconds: 10
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "iris qlist iris | grep running"
+      volumes:
+      - name: iris-external-sys
+        persistentVolumeClaim:
+          claimName: iris-pvc
+      - name: cpf-merge
+        configMap:
+          name: iris-cpf-merge
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: iris-pvc
+spec:
+  # to install Longhorn use:
+  #  kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/master/deploy/longhorn.yaml
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iris-cpf-merge
+  namespace: default
+data:
+  merge.cpf: |-
+    [config]
+    globals=0,0,800,0,0,0
+    gmheap=256000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: iris
+  ports:
+    - protocol: TCP
+      port: 52773
+      targetPort: 52773
