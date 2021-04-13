@@ -3,8 +3,8 @@
 #change to your own values
 s3_bucket=longhorn-backup-dev
 s3_region=us-east-2
-aws_key=AKIA5Q4VZVF55A44564Y
-aws_secret=uquEhaT6Pt30g+7rliTIrwewoEoebVww0YqWiqxA
+aws_key=AKIA5Q4VZVEXAMPLE
+aws_secret=uquEhaT6Pt30g+7rliTIrwewoEoebVexample
 
 
 #Install CSI Snapshotter

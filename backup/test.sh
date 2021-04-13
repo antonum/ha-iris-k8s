@@ -3,7 +3,10 @@
 #change to your own values
 namespace=backup-test
 
+#create namespace
 echo -e "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: ${namespace}" | kubectl apply -f -
+#kubectl create namespace $namespace
+
 kubectl apply -f tldr.yaml -n $namespace
 #Wait for pod to be ready
 while [[ $(kubectl get pods -n $namespace -l app=iris -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
@@ -17,6 +20,7 @@ kubectl -n $namespace exec $pod_name -- bash -c 'echo -e "set ^k8stest(\$i(^k8st
 
 #read -p "Press [Enter] key to start backup..."
 #Freeze Write Daemon 
+echo "Freezing IRIS Write Daemon"
 kubectl exec -it -n $namespace $pod_name -- iris session iris -U%SYS "##Class(Backup.General).ExternalFreeze()"
 status=$?
 if [[ $status -eq 5 ]]; then
@@ -43,10 +47,12 @@ kubectl -n $namespace exec $pod_name -- bash -c 'echo -e "write \"Previos state:
 #read -p "Press [Enter] key to stop deployment and clone..."
 
 #Delete clone
-kubectl delete -f backup/iris-pvc-snapshot-restore.yaml -n $namespace
 kubectl delete -f backup/iris-deployment-snapshot.yaml -n $namespace
-#Delete deployment
+kubectl delete -f backup/iris-pvc-snapshot-restore.yaml -n $namespace
+
+#Delete original deployment
 kubectl delete -f tldr.yaml -n $namespace
+
 #Delete backup
 kubectl delete -f backup/iris-volume-snapshot.yaml -n $namespace
 
