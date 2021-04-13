@@ -8,11 +8,11 @@ aws_secret=uquEhaT6Pt30g+7rliTIrwewoEoebVexample
 
 
 #Install CSI Snapshotter
-kubectl apply -n kube-system -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/master/client/config/crd/snapshot.storage.k8s.io_volumesnapshotcontents.yaml
+kubectl apply -n kube-system -f https://github.com/kubernetes-csi/external-snapshotter/raw/master/client/config/crd/snapshot.storage.k8s.io_volumesnapshotcontents.yaml
 kubectl apply -n kube-system -f https://github.com/kubernetes-csi/external-snapshotter/raw/master/client/config/crd/snapshot.storage.k8s.io_volumesnapshotclasses.yaml
-kubectl apply -n kube-system -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/master/client/config/crd/snapshot.storage.k8s.io_volumesnapshots.yaml
-kubectl apply -n kube-system -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/master/deploy/kubernetes/snapshot-controller/setup-snapshot-controller.yaml
-kubectl apply -n kube-system -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/master/deploy/kubernetes/snapshot-controller/rbac-snapshot-controller.yaml
+kubectl apply -n kube-system -f https://github.com/kubernetes-csi/external-snapshotter/raw/master/client/config/crd/snapshot.storage.k8s.io_volumesnapshots.yaml
+kubectl apply -n kube-system -f https://github.com/kubernetes-csi/external-snapshotter/raw/master/deploy/kubernetes/snapshot-controller/setup-snapshot-controller.yaml
+kubectl apply -n kube-system -f https://github.com/kubernetes-csi/external-snapshotter/raw/master/deploy/kubernetes/snapshot-controller/rbac-snapshot-controller.yaml
 
 #configure Longhorn backup target and credentials
 cat <<EOF | kubectl apply -f -
