@@ -1,18 +1,18 @@
 apiVersion: apps/v1 
 kind: Deployment
 metadata:
-  name: iris
+  name: irisclone
 spec:
   selector:
     matchLabels:
-      app: iris
+      app: irisclone
   strategy:
     type: Recreate
   replicas: 1
   template:
     metadata:
       labels:
-        app: iris
+        app: irisclone
     spec:
       containers:
       - image: store/intersystems/iris-community:2020.4.0.524.0
@@ -41,44 +41,7 @@ spec:
       volumes:
       - name: iris-external-sys
         persistentVolumeClaim:
-          claimName: iris-pvc
+          claimName: iris-pvc-restored
       - name: cpf-merge
         configMap:
           name: iris-cpf-merge
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: iris-pvc
-spec:
-  # to install Longhorn use:
-  #  kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/master/deploy/longhorn.yaml
-  storageClassName: longhorn
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: iris-cpf-merge
-data:
-  merge.cpf: |-
-    [config]
-    globals=0,0,500,0,0,0
-    gmheap=256000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: iris-svc
-spec:
-  type: LoadBalancer
-  selector:
-    app: iris
-  ports:
-    - protocol: TCP
-      port: 52773
-      targetPort: 52773

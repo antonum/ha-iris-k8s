@@ -45,6 +45,15 @@ spec:
       - name: cpf-merge
         configMap:
           name: iris-cpf-merge
+      #tolerations:
+      #- key: "node.kubernetes.io/unreachable"
+      #  operator: "Exists"
+      #  effect: "NoExecute"
+      #  tolerationSeconds: 5      
+      #- key: "node.kubernetes.io/not-ready"
+      #  operator: "Exists"
+      #  effect: "NoExecute"
+      #  tolerationSeconds: 5
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -64,11 +73,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: iris-cpf-merge
-  namespace: default
 data:
   merge.cpf: |-
     [config]
-    globals=0,0,800,0,0,0
+    globals=0,0,500,0,0,0
     gmheap=256000
 ---
 apiVersion: v1
